@@ -1,0 +1,356 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tienda Mar</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#f4f6f8;
+}
+
+/* header */
+
+header{
+background:#111;
+color:white;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 30px;
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
+}
+
+/* hero */
+
+.hero{
+background:linear-gradient(120deg,#2563eb,#38bdf8);
+color:white;
+text-align:center;
+padding:60px 20px;
+}
+
+/* buscador */
+
+.buscador{
+text-align:center;
+margin:20px;
+}
+
+input,select{
+padding:10px;
+margin:5px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+/* catálogo */
+
+.catalogo{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:25px;
+padding:30px;
+}
+
+.producto{
+background:white;
+border-radius:10px;
+box-shadow:0 8px 20px rgba(0,0,0,0.1);
+overflow:hidden;
+}
+
+.producto img{
+width:100%;
+height:200px;
+object-fit:cover;
+}
+
+.info{
+padding:15px;
+text-align:center;
+}
+
+.precio{
+color:#2563eb;
+font-weight:bold;
+}
+
+button{
+background:#22c55e;
+border:none;
+padding:10px 15px;
+color:white;
+border-radius:6px;
+cursor:pointer;
+margin-top:8px;
+}
+
+/* carrito */
+
+.carrito{
+position:fixed;
+right:0;
+top:0;
+width:280px;
+height:100%;
+background:white;
+box-shadow:-5px 0 15px rgba(0,0,0,0.2);
+padding:20px;
+overflow:auto;
+}
+
+.item{
+border-bottom:1px solid #ddd;
+padding:6px 0;
+}
+
+.total{
+font-weight:bold;
+margin-top:10px;
+}
+
+/* whatsapp flotante */
+
+.whatsapp{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#25D366;
+color:white;
+padding:15px;
+border-radius:50%;
+font-size:24px;
+text-decoration:none;
+}
+
+footer{
+background:#111;
+color:white;
+text-align:center;
+padding:15px;
+margin-top:30px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">TIENDA MAR</div>
+
+</header>
+
+<section class="hero">
+
+<h1>Tienda Mar</h1>
+<p>Remeras modernas al mejor precio</p>
+
+</section>
+
+<div class="buscador">
+
+<input type="text" id="buscar" placeholder="Buscar producto..." onkeyup="filtrar()">
+
+<select id="precio" onchange="filtrar()">
+<option value="">Todos los precios</option>
+<option value="15000">Hasta 15000</option>
+<option value="17000">Hasta 17000</option>
+<option value="20000">Hasta 20000</option>
+</select>
+
+</div>
+
+<section class="catalogo" id="catalogo"></section>
+
+<div class="carrito">
+
+<h2>Carrito</h2>
+
+<div id="lista"></div>
+
+<div class="total" id="total">Total: $0</div>
+
+<button onclick="comprar()">Comprar</button>
+
+</div>
+
+<a href="https://wa.me/549XXXXXXXXXX" class="whatsapp">💬</a>
+
+<footer>
+
+<p>© 2026 Tienda Mar</p>
+
+</footer>
+
+<script>
+
+/* productos */
+
+let productos=[
+
+{nombre:"Remera Negra",precio:15000,img:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab"},
+{nombre:"Remera Blanca",precio:15000,img:"https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb"},
+{nombre:"Remera Roja",precio:16000,img:"https://images.unsplash.com/photo-1523381294911-8d3cead13475"},
+{nombre:"Remera Verde",precio:16000,img:"https://images.unsplash.com/photo-1583743814966-8936f37f4678"},
+{nombre:"Remera Azul",precio:17000,img:"https://images.unsplash.com/photo-1520975922203-b6b21b6c7f3b"},
+{nombre:"Remera Gris",precio:17000,img:"https://images.unsplash.com/photo-1503342217505-b0a15ec3261c"},
+{nombre:"Remera Oversize",precio:18000,img:"https://images.unsplash.com/photo-1509631179647-0177331693ae"},
+{nombre:"Remera Street",precio:18000,img:"https://images.unsplash.com/photo-1520975916090-3105956dac38"}
+
+]
+
+/* carrito */
+
+let carrito=JSON.parse(localStorage.getItem("carrito"))||[]
+
+function guardar(){
+localStorage.setItem("carrito",JSON.stringify(carrito))
+}
+
+/* mostrar catálogo */
+
+function mostrarProductos(){
+
+let cont=document.getElementById("catalogo")
+cont.innerHTML=""
+
+productos.forEach(function(p){
+
+let div=document.createElement("div")
+
+div.className="producto"
+
+div.innerHTML=
+
+"<img src='"+p.img+"'>"+
+"<div class='info'>"+
+"<h3>"+p.nombre+"</h3>"+
+"<p class='precio'>$"+p.precio+"</p>"+
+"<button onclick='agregar(\""+p.nombre+"\","+p.precio+")'>Agregar</button>"+
+"</div>"
+
+cont.appendChild(div)
+
+})
+
+}
+
+mostrarProductos()
+
+/* carrito */
+
+function agregar(nombre,precio){
+
+carrito.push({nombre,precio})
+
+guardar()
+
+mostrarCarrito()
+
+}
+
+function mostrarCarrito(){
+
+let lista=document.getElementById("lista")
+
+lista.innerHTML=""
+
+let total=0
+
+carrito.forEach(function(p,i){
+
+total+=p.precio
+
+let div=document.createElement("div")
+
+div.className="item"
+
+div.innerHTML=p.nombre+" $"+p.precio+" <button onclick='eliminar("+i+")'>X</button>"
+
+lista.appendChild(div)
+
+})
+
+document.getElementById("total").innerText="Total: $"+total
+
+}
+
+mostrarCarrito()
+
+function eliminar(i){
+
+carrito.splice(i,1)
+
+guardar()
+
+mostrarCarrito()
+
+}
+
+/* comprar */
+
+function comprar(){
+
+let telefono="549XXXXXXXXXX"
+
+let mensaje="Hola quiero comprar:%0A"
+
+let total=0
+
+carrito.forEach(function(p){
+
+mensaje+=p.nombre+" $"+p.precio+"%0A"
+
+total+=p.precio
+
+})
+
+mensaje+="Total: $"+total
+
+window.open("https://wa.me/"+telefono+"?text="+mensaje)
+
+}
+
+/* filtros */
+
+function filtrar(){
+
+let texto=document.getElementById("buscar").value.toLowerCase()
+
+let precio=document.getElementById("precio").value
+
+document.querySelectorAll(".producto").forEach(function(p){
+
+let nombre=p.querySelector("h3").innerText.toLowerCase()
+
+let precioProd=parseInt(p.querySelector(".precio").innerText.replace("$",""))
+
+let mostrar=true
+
+if(texto && !nombre.includes(texto)) mostrar=false
+
+if(precio && precioProd>precio) mostrar=false
+
+p.style.display=mostrar?"block":"none"
+
+})
+
+}
+
+</script>
+
+</body>
+</html>
+```
